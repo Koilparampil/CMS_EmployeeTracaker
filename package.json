@@ -1,0 +1,26 @@
+{
+  "name": "cms_employeetracaker",
+  "version": "1.0.0",
+  "description": "this is a content management system that runs on the command line to manage a company's employee database using Node.js and Inquirer and MySQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Koilparampil/CMS_EmployeeTracaker.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Koilparampil/CMS_EmployeeTracaker/issues"
+  },
+  "homepage": "https://github.com/Koilparampil/CMS_EmployeeTracaker#readme",
+  "dependencies": {
+    "ascii-art": "^2.8.5",
+    "console.table": "^0.10.0",
+    "inquirer": "^8.2.0",
+    "mysql2": "^2.3.3"
+  }
+}
