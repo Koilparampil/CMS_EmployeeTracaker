@@ -31,18 +31,18 @@ spChoices=[
   'Quit'
 ]
 departments=[]
-
-art.font("Employee \n Manager", 'doom')
-.then((rendered)=>{
-    console.log(rendered)
-}).then(startingPoint());
+roles=[]
 
 db.query('SELECT * FROM departments', function (err, results) {
   results.forEach(element =>{
     departments.push(element.name)
   });
 });
-
+db.query('SELECT * FROM roles', function (err, results) {
+  results.forEach(element =>{
+    roles.push(element.name)
+  });
+});
 
 
 async function startingPoint(){
@@ -59,7 +59,15 @@ async function startingPoint(){
         type:'list',
         name:'employeesbyDep',
         message: 'Which Department would you like to see employees for?',
-        choices: departments
+        choices: departments,
+        when:(answers)=> answers.startingPoint==='View Employees by Department'
+      },
+      {
+        type:'list',
+        name:'employeesbyRole',
+        message: 'Which Manager would you like to see employees for?',
+        choices: 'BitcH',
+        when:(answers)=> answers.startingPoint==='View Employees by Manager'
       }
     ])
 }
