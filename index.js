@@ -1,11 +1,6 @@
 const mysql= require('mysql2');
 const art= require('ascii-art')
 const inquirer = require('inquirer');
-art.font("Employee Manager" , 'doom', (err, rendered)=>{
-    console.log(rendered);
-});
-
-
 const db = mysql.createConnection(
     {
       host: 'localhost',
@@ -17,6 +12,7 @@ const db = mysql.createConnection(
     },
     console.log(`Connected to the emplyee_db database.`)
   );
+
 spChoices=[
   'View All Employees',
   'View Employees by Department',
@@ -34,11 +30,22 @@ spChoices=[
   'Veiw Total Utilized Budget by Department',
   'Quit'
 ]
+departments=[]
+
+art.font("Employee \n Manager", 'doom')
+.then((rendered)=>{
+    console.log(rendered)
+}).then(startingPoint());
+
+db.query('SELECT * FROM departments', function (err, results) {
+  results.forEach(element =>{
+    departments.push(element.name)
+  });
+});
 
 
 
-
-function staringPoint(){
+async function startingPoint(){
   inquirer
     .prompt([
       {
@@ -52,7 +59,7 @@ function staringPoint(){
         type:'list',
         name:'employeesbyDep',
         message: 'Which Department would you like to see employees for?',
-        choices:''
+        choices: departments
       }
     ])
 }
