@@ -21,11 +21,11 @@ VALUES ("General Manager",465581,8),
 
 
 INSERT INTO employees (first_name,last_name,role_id,manager_id)
-VALUES ("Shawn","Reed",1,),
-       ("May","Mitchell",2,1),
-       ("Abbie","Smith",3,3),
-       ("Blake","Fischer",4,4),
-       ("Four","Price",5,6),
+VALUES ("Shawn","Reed",1,7),
+       ("May","Mitchell",2,NULL),
+       ("Abbie","Smith",3,1),
+       ("Blake","Fischer",4,1),
+       ("Four","Price",5,3),
        ("Pinch","Reyes",6,7),
-       ("Lauren","Roberts",8,5),
-       ("Liz-Marie","Lee",7,null);
+       ("Lauren","Roberts",9,3),
+       ("Liz-Marie","Lee",8,null);
