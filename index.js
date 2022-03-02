@@ -104,7 +104,7 @@ inquirer
           viewAllRoles();
           break;
         case 'Add Role':
-          
+          addRole();
           break;
         case 'Remove Role':
           
@@ -172,7 +172,42 @@ let viewAllRoles = () =>{
   })
 }
 
-
+let addRole= ()=>{
+  inquirer
+    .prompt([
+      {
+        type:'input',
+        message:'What is the name of the New role?',
+        name: 'roleName'
+      },
+      {
+        type:'number',
+        message:'What is the salary of the New role?',
+        name: 'roleSal'
+      },
+      {
+        type:'list',
+        message:'What is the department of the New role?',
+        name: 'roleDep',
+        choices:departments
+      }
+    ]).then(answers=>{
+      let depID
+      db.query(`SELECT departments.id FROM departments
+      WHERE departments.name="${answers.roleDep}";`, function(err,results6){
+        if(err){
+          console.error(err);
+        }
+        depID=results6[0].id
+        db.query(`INSERT INTO roles (title, salary, department_id)
+                  VALUES ('${answers.roleName}',${answers.roleSal},${depID})`, function (err,results){
+                    if(err){
+                      console.error(err);
+                    }
+                  })
+      })
+    })
+}
 
 let  addEmployee= async ()=>{
   managers.push('None')
