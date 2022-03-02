@@ -92,7 +92,7 @@ inquirer
           addEmployee();
           break;
         case 'Remove Employee':
-          
+          RemEmployee();
           break;
         case 'Update Employee Role':
           UpEmployeeRole();
@@ -119,7 +119,7 @@ inquirer
           
           break;
         case 'Veiw Total Utilized Budget by Department':
-          
+          totalUtilBudget();
           break;
         case 'Quit':
           db.end()
@@ -264,6 +264,38 @@ inquirer
     });
 }
 
+let RemEmployee= ()=>{
+  let employeeNames=[]
+  db.query(`SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS Names
+          FROM employees `,function(err,results){
+            results.forEach(element =>{
+              if (!employeeNames.includes(element.Names)){
+                employeeNames.push(element.Names)
+              }
+            });
+            inquirer
+              .prompt([
+                {
+                  type:'list',
+                  name:'removeEmployee',
+                  message:"Which Employee would you like to remove?",
+                  choices:employeeNames,
+                }
+              ]).then(answers=>{
+                db.query(`DELETE FROM employees 
+                          WHERE CONCAT(employees.first_name, ' ', employees.last_name) = "${answers.removeEmployee}"`, function(err,results){
+                            if(err){
+                              console.error(err);
+                            }; 
+                          });
+                          });
+              });
+}
+
+let RemRole= ()=>{
+  
+}
+
 let UpEmployeeRole= ()=>{
   let employeeNames=[]
 db.query(`SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS Names
@@ -331,4 +363,26 @@ let addDep= ()=>{
       db.query(`INSERT INTO departments (name)
                 VALUES ('${answers.depName}')`)
     })
+}
+
+let totalUtilBudget= () =>{
+  inquirer
+    .prompt([
+      {
+        type:'list',
+        name:'budgetbyDep',
+        message: 'Which Department would you like to see the budget for?',
+        choices: departments,
+      }
+    ]).then(answers=>{
+      db.query(`SELECT SUM(roles.salary) as "totalBudget" 
+                FROM employees 
+                INNER JOIN roles ON employees.role_id = roles.id 
+                INNER JOIN departments ON roles.department_id = departments.id 
+                WHERE departments.name = '${answers.budgetbyDep}'
+                ORDER BY employees.id`, function( err,results){
+                  console.table(results);
+                });
+    });
+
 }
