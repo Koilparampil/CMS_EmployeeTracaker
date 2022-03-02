@@ -97,13 +97,13 @@ inquirer
           
           break;
         case 'Update Employee Role':
-          
+          UpEmployeeRole();
           break;
         case 'Update Employee Manager': 
         
           break;
         case 'View All Roles':
-          
+          viewAllRoles()
           break;
         case 'Add Role':
           
@@ -154,6 +154,14 @@ let viewbyMan = (manager) =>{
   FROM employees AS e LEFT JOIN employees AS m ON e.manager_id = m.id
   WHERE CONCAT(m.first_name, ' ', m.last_name) = '${manager}'`, function (err,results){
     console.table(results)
+  })
+}
+
+let viewAllRoles = () =>{
+  db.query(`SELECT roles.id,roles.title,roles.salary, departments.name as department
+            FROM roles
+            join departments ON roles.department_id=departments.id`, function (err, results) {
+    console.table(results);
   })
 }
 
@@ -210,4 +218,60 @@ inquirer
       });
 
     });
-  }
+}
+
+let UpEmployeeRole= ()=>{
+  let employeeNames=[]
+db.query(`SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS Names
+          FROM employees `,function(err,results){
+            console.log(results)
+            results.forEach(element =>{
+              if (!employeeNames.includes(element.Names)){
+                employeeNames.push(element.Names)
+              }
+            });
+            inquirer
+              .prompt([
+                {
+                  type:'list',
+                  name:'upDateEmployee',
+                  message:"Which Employee would you like to update?",
+                  choices:employeeNames,
+                },
+                {
+                  type:'list',
+                  name:'upDateEmployeeRole',
+                  message:"Which Role would you like to give the Employee?",
+                  choices:roles,
+                }
+              ]).then(answers=>{
+                let rolesID
+                let namesID
+                db.query(`SELECT employees.id FROM employees
+                          WHERE CONCAT(employees.first_name, ' ', employees.last_name) = "${answers.upDateEmployee}"`, function(err,results3){
+                            if(err){
+                              console.error(err);
+                            }
+                            namesID=results3[0].id
+                            db.query(`SELECT roles.id FROM roles 
+                            WHERE roles.title = "${answers.upDateEmployeeRole}"`, function (err, results4) {
+                              if(err){
+                                console.error(err);
+                              }
+                              rolesID=results4[0].id
+                              db.query(`UPDATE employees
+                              SET employees.role_id=${rolesID}
+                              WHERE employees.id=${namesID}`, function (err, results5) {
+                                if(err){
+                                  console.error(err);
+                                }
+                              })
+                            })
+                          })
+
+              
+              })                        
+              
+          })
+}
+
