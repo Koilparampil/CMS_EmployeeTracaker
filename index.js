@@ -32,7 +32,7 @@ spChoices=[
 ]
 departments=[]
 managers=[]
-
+roles=[]
 db.query('SELECT * FROM departments', function (err, results) {
   results.forEach(element =>{
     departments.push(element.name)
@@ -47,10 +47,13 @@ WHERE m.id IS NOT NULL`, function (err, results) {
     }
   });
 });
+db.query(`SELECT title FROM employee_db.roles`, function (err, results) {
+  results.forEach(element =>{
+    roles.push(element.title)
+  });
+})
 
-
-async function startingPoint(){
-  inquirer
+inquirer
     .prompt([
       {
         
@@ -77,57 +80,57 @@ async function startingPoint(){
     .then(answers => {
       switch(answers.startingPoint){
         case 'View All Employees':
-          viewEmployees().then(startingPoint());
+          viewEmployees();
           break;
         case 'View Employees by Department':
           viewByDep(answers.employeesbyDep);
-          startingPoint()
+          
           break;
         case 'View Employees by Manager':
           viewbyMan(answers.employeesbyMan)
-          startingPoint()
+          
           break;
         case 'Add Employee':
-          startingPoint()
+          addEmployee()
           break;
         case 'Remove Employee':
-          startingPoint()
+          
           break;
         case 'Update Employee Role':
-          startingPoint()
+          
           break;
         case 'Update Employee Manager': 
-        startingPoint()
+        
           break;
         case 'View All Roles':
-          startingPoint()
+          
           break;
         case 'Add Role':
-          startingPoint()
+          
           break;
         case 'Remove Role':
-          startingPoint()
+          
           break;
         case 'Veiw all Departments':
-          startingPoint()
+          
           break;
         case 'Add Department':
-          startingPoint()
+          
           break;
         case 'Remove Department':
-          startingPoint()
+          
           break;
         case 'Veiw Total Utilized Budget by Department':
-          startingPoint()
+          
           break;
         case 'Quit':
           db.end()
           return;
       }
+      
     })
-}
 
-startingPoint()
+
 
 let viewEmployees = () =>{
 db.query('SELECT * FROM employees', function (err, results) {
@@ -153,3 +156,58 @@ let viewbyMan = (manager) =>{
     console.table(results)
   })
 }
+
+let  addEmployee= async ()=>{
+  managers.push('None')
+inquirer
+  .prompt([
+    {
+        type:'input',
+        message:'What is the first name of the New Employee?',
+        name: 'employeefName'
+    },
+    {
+      type:'input',
+      message:'What is the last name of the New Employee?',
+      name: 'employeelName'
+    },
+    {
+      type:'list',
+      message:`What is the employee's role?`,
+      name: 'employeeRole',
+      choices: roles
+    },
+    {
+      type:'list',
+      message:`Who is your manager?`,
+      name: 'employeeManager',
+      choices: managers
+    }
+  ]).then(async answers=>{
+    let variable1
+     db.query(`SELECT roles.id FROM roles 
+      WHERE roles.title = "${answers.employeeRole }"`, async function (err, results) {
+        if(err){
+          console.error(err);
+        }
+      variable1= await results[0].id
+      let variable2
+      if(answers.employeeManager==="None"){
+        variable2=null
+      }else if(managers.includes(answers.employeeManager)){
+        db.query(`SELECT employees.id FROM employees 
+        WHERE CONCAT(employees.first_name, ' ', employees.last_name) = "${answers.employeeManager }"`, async function (err, results1) {
+          if(err){
+            console.error(err);
+          }
+        variable2= await results1[0].id
+        db.query(`INSERT INTO employees (first_name, last_name, role_id,manager_id)
+                  VALUES ('${answers.employeefName}','${answers.employeelName}','${variable1}','${variable2}');`, function (err, results2) {
+      if(err){console.error(err);}
+    });
+      });
+      }
+      });
+
+    });
+  }
