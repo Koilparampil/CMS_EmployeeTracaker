@@ -84,14 +84,12 @@ inquirer
           break;
         case 'View Employees by Department':
           viewByDep(answers.employeesbyDep);
-          
           break;
         case 'View Employees by Manager':
-          viewbyMan(answers.employeesbyMan)
-          
+          viewbyMan(answers.employeesbyMan);
           break;
         case 'Add Employee':
-          addEmployee()
+          addEmployee();
           break;
         case 'Remove Employee':
           
@@ -103,7 +101,7 @@ inquirer
         
           break;
         case 'View All Roles':
-          viewAllRoles()
+          viewAllRoles();
           break;
         case 'Add Role':
           
@@ -112,10 +110,10 @@ inquirer
           
           break;
         case 'Veiw all Departments':
-          
+          viewAllDeps();
           break;
         case 'Add Department':
-          
+          addDep();
           break;
         case 'Remove Department':
           
@@ -133,7 +131,10 @@ inquirer
 
 
 let viewEmployees = () =>{
-db.query('SELECT * FROM employees', function (err, results) {
+db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department
+          FROM employees
+          JOIN roles ON employees.role_id=roles.id
+          JOIN departments ON roles.department_id=departments.id`, function (err, results) {
     console.table(results);
 });
 }
@@ -157,6 +158,12 @@ let viewbyMan = (manager) =>{
   })
 }
 
+let viewAllDeps = () =>{
+  db.query('SELECT * FROM departments', function (err, results) {
+    console.table(results);
+});
+}
+
 let viewAllRoles = () =>{
   db.query(`SELECT roles.id,roles.title,roles.salary, departments.name as department
             FROM roles
@@ -164,6 +171,8 @@ let viewAllRoles = () =>{
     console.table(results);
   })
 }
+
+
 
 let  addEmployee= async ()=>{
   managers.push('None')
@@ -275,3 +284,16 @@ db.query(`SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS Names
           })
 }
 
+let addDep= ()=>{
+  inquirer
+    .prompt([
+    {
+      type:'input',
+      message:'What is the name of the New Department?',
+      name: 'depName'
+    }
+    ]).then(answers=>{
+      db.query(`INSERT INTO departments (name)
+                VALUES ('${answers.depName}')`)
+    })
+}
