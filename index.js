@@ -116,7 +116,7 @@ inquirer
           addDep();
           break;
         case 'Remove Department':
-          
+          RemDep();
           break;
         case 'Veiw Total Utilized Budget by Department':
           totalUtilBudget();
@@ -309,6 +309,25 @@ let RemRole= ()=>{
                   };
                 });
     });
+}
+
+let RemDep= ()=>{
+  inquirer
+  .prompt([
+    {
+      type:'list',
+      name:'removeDep',
+      message:"Which Department would you like to remove?",
+      choices:departments,
+    }
+  ]).then(answers=>{
+    db.query(`DELETE FROM departments
+              WHERE departments.name='${answers.removeDep}'`,function(err,results){
+                if(err){
+                  console.error(err);
+                };
+              });
+  });
 }
 
 let UpEmployeeRole= ()=>{
