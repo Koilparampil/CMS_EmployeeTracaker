@@ -107,7 +107,7 @@ inquirer
           addRole();
           break;
         case 'Remove Role':
-          
+          RemRole();
           break;
         case 'Veiw all Departments':
           viewAllDeps();
@@ -293,7 +293,22 @@ let RemEmployee= ()=>{
 }
 
 let RemRole= ()=>{
-  
+  inquirer
+    .prompt([
+      {
+        type:'list',
+        name:'removeRole',
+        message:"Which role would you like to remove?",
+        choices:roles,
+      }
+    ]).then(answers=>{
+      db.query(`DELETE FROM roles
+                WHERE roles.title='${answers.removeRole}'`,function(err,results){
+                  if(err){
+                    console.error(err);
+                  };
+                });
+    });
 }
 
 let UpEmployeeRole= ()=>{
