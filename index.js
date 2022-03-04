@@ -20,7 +20,6 @@ spChoices=[
   'Add Employee',
   'Remove Employee',
   'Update Employee Role',
-  'Update Employee Manager',
   'View All Roles',
   'Add Role',
   'Remove Role',
@@ -30,28 +29,31 @@ spChoices=[
   'Veiw Total Utilized Budget by Department',
   'Quit'
 ]
-departments=[]
-managers=[]
-roles=[]
-db.query('SELECT * FROM departments', function (err, results) {
-  results.forEach(element =>{
-    departments.push(element.name)
+
+
+function menuCode(){
+  departments=[]
+  managers=[]
+  roles=[]
+  db.query('SELECT * FROM departments', function (err, results) {
+    results.forEach(element =>{
+      departments.push(element.name)
+    });
   });
-});
-db.query(`SELECT CONCAT(m.first_name, ' ', m.last_name) AS manager 
-FROM employees AS e LEFT JOIN employees AS m ON e.manager_id = m.id
-WHERE m.id IS NOT NULL`, function (err, results) {
-  results.forEach(element =>{
-    if (!managers.includes(element.manager)){
-    managers.push(element.manager)
-    }
+  db.query(`SELECT CONCAT(m.first_name, ' ', m.last_name) AS manager 
+  FROM employees AS e LEFT JOIN employees AS m ON e.manager_id = m.id
+  WHERE m.id IS NOT NULL`, function (err, results) {
+    results.forEach(element =>{
+      if (!managers.includes(element.manager)){
+      managers.push(element.manager)
+      }
+    });
   });
-});
-db.query(`SELECT title FROM employee_db.roles`, function (err, results) {
-  results.forEach(element =>{
-    roles.push(element.title)
-  });
-})
+  db.query(`SELECT title FROM employee_db.roles`, function (err, results) {
+    results.forEach(element =>{
+      roles.push(element.title)
+    });
+  })
 
 inquirer
     .prompt([
@@ -77,8 +79,8 @@ inquirer
         when:(answers)=> answers.startingPoint==='View Employees by Manager'
       }
     ])
-    .then(answers => {
-      switch(answers.startingPoint){
+    .then(async answers => {
+     switch(answers.startingPoint){
         case 'View All Employees':
           viewEmployees();
           break;
@@ -96,9 +98,6 @@ inquirer
           break;
         case 'Update Employee Role':
           UpEmployeeRole();
-          break;
-        case 'Update Employee Manager': 
-        
           break;
         case 'View All Roles':
           viewAllRoles();
@@ -125,10 +124,8 @@ inquirer
           db.end()
           return;
       }
-      
     })
-
-
+}
 
 let viewEmployees = () =>{
 db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.title, roles.salary, departments.name AS department
@@ -136,6 +133,7 @@ db.query(`SELECT employees.id, employees.first_name, employees.last_name, roles.
           JOIN roles ON employees.role_id=roles.id
           JOIN departments ON roles.department_id=departments.id`, function (err, results) {
     console.table(results);
+    menuCode();
 });
 }
 
@@ -147,6 +145,7 @@ let viewByDep = (department)=>{
   WHERE departments.name = '${department}'
   ORDER BY employees.id`, function (err, results) {
     console.table(results);
+    menuCode();
 });
 }
 
@@ -155,12 +154,14 @@ let viewbyMan = (manager) =>{
   FROM employees AS e LEFT JOIN employees AS m ON e.manager_id = m.id
   WHERE CONCAT(m.first_name, ' ', m.last_name) = '${manager}'`, function (err,results){
     console.table(results)
+    menuCode();
   })
 }
 
 let viewAllDeps = () =>{
   db.query('SELECT * FROM departments', function (err, results) {
     console.table(results);
+    menuCode();
 });
 }
 
@@ -169,10 +170,17 @@ let viewAllRoles = () =>{
             FROM roles
             join departments ON roles.department_id=departments.id`, function (err, results) {
     console.table(results);
+    menuCode();
   })
 }
 
 let addRole= ()=>{
+  roles=[]
+  db.query(`SELECT title FROM employee_db.roles`, function (err, results) {
+    results.forEach(element =>{
+      roles.push(element.title)
+    });
+  })
   inquirer
     .prompt([
       {
@@ -204,13 +212,16 @@ let addRole= ()=>{
                     if(err){
                       console.error(err);
                     }
+                    menuCode();
                   })
       })
     })
 }
 
 let  addEmployee= async ()=>{
-  managers.push('None')
+  if(!managers.includes('None')){
+    managers.push('None')
+  }
 inquirer
   .prompt([
     {
@@ -245,7 +256,11 @@ inquirer
       variable1= await results[0].id
       let variable2
       if(answers.employeeManager==="None"){
-        variable2=null
+        db.query(`INSERT INTO employees (first_name, last_name, role_id,manager_id)
+        VALUES ('${answers.employeefName}','${answers.employeelName}','${variable1}',NULL);`, function (err, results2) {
+if(err){console.error(err);}
+menuCode();
+});
       }else if(managers.includes(answers.employeeManager)){
         db.query(`SELECT employees.id FROM employees 
         WHERE CONCAT(employees.first_name, ' ', employees.last_name) = "${answers.employeeManager }"`, async function (err, results1) {
@@ -256,6 +271,7 @@ inquirer
         db.query(`INSERT INTO employees (first_name, last_name, role_id,manager_id)
                   VALUES ('${answers.employeefName}','${answers.employeelName}','${variable1}','${variable2}');`, function (err, results2) {
       if(err){console.error(err);}
+      menuCode();
     });
       });
       }
@@ -287,6 +303,7 @@ let RemEmployee= ()=>{
                             if(err){
                               console.error(err);
                             }; 
+                            menuCode();
                           });
                           });
               });
@@ -307,6 +324,7 @@ let RemRole= ()=>{
                   if(err){
                     console.error(err);
                   };
+                  menuCode();
                 });
     });
 }
@@ -326,6 +344,7 @@ let RemDep= ()=>{
                 if(err){
                   console.error(err);
                 };
+                menuCode();
               });
   });
 }
@@ -374,10 +393,11 @@ db.query(`SELECT CONCAT(employees.first_name, ' ', employees.last_name) AS Names
                               WHERE employees.id=${namesID}`, function (err, results5) {
                                 if(err){
                                   console.error(err);
-                                }
-                              })
-                            })
-                          })
+                                };
+                                menuCode();
+                              });
+                            });
+                          });
 
               
               })                        
@@ -395,7 +415,12 @@ let addDep= ()=>{
     }
     ]).then(answers=>{
       db.query(`INSERT INTO departments (name)
-                VALUES ('${answers.depName}')`)
+                VALUES ('${answers.depName}')`, function(err,results){
+                  if(err){
+                    console.error(err);
+                  };
+                  menuCode();
+                })
     })
 }
 
@@ -416,7 +441,10 @@ let totalUtilBudget= () =>{
                 WHERE departments.name = '${answers.budgetbyDep}'
                 ORDER BY employees.id`, function( err,results){
                   console.table(results);
+                  menuCode();
                 });
     });
 
 }
+
+menuCode();
